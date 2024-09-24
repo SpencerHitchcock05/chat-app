@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<form action="/new_account" method="POST">
+    <label for="username">Username:</label>
+    <input type="text" name="username" value="{{username}}">
+    <label for="password">Password:</label>
+    <input type="password" name="password" value='{{password}}'>
+    <label for="password"> Rewrite Password:</label>
+    <input type="password" name="rewritePassword" value='{{rewritePassword}}'>
+    <input type="submit" name="new_account" value="Create Account">
+
+    {% if error %}
+        <div>
+            {{error}}
+        </div>
+    {% endif %}
+</form>
+{% endblock %}

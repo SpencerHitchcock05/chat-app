@@ -1,0 +1,103 @@
+body {
+    background-color: black;
+    color: white;
+    margin: 0;
+    width: 100vw;
+    height:100vw;
+    overflow: hidden;
+    
+}
+
+main {
+    display: grid;
+    grid-template-areas: 
+    'group-container messages messages'
+    'group-container message-container message-container';
+    height:auto;
+}
+
+#nav-container {
+    width: 100%;
+    height: 90px;
+    border-bottom: 1px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#search-box {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#search-button {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+#group-container {
+    display: flex;
+    flex-direction: column;
+    
+    grid-area: group-container;
+    width: 300px;    
+    
+}
+
+.group {
+    color:white;
+    background-color: black;
+    padding: 0;
+    border: 1px solid white;
+}
+
+.unread {
+    background-color: rgb(0, 255, 0);
+}
+
+.focused {
+    background-color: red;
+}
+
+
+
+#message-container {
+    grid-area: message-container;
+    
+    bottom: 0;
+    right: 0;
+    width:70vw;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+}
+
+#group-name {
+    text-align: center;
+}
+
+
+.message-text {
+    font-size: 1.1rem;
+}
+
+#message-box {
+    width: 80%;
+    margin: 10px 5px;
+}
+
+#messages {
+    grid-area: messages;
+    display: flex;
+    flex-direction: column;
+    width: 60vw;
+
+}
+
+.group {
+    border: 1px solid black
+}

@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<nav id="nav-container">
+    <div>
+        <input type="text" id="search-box">
+        <button onClick="searchUsers()" id="search-button"></button>
+    </div>
+</nav>
+
+<h1>{{user.username}}</h1>
+
+<main>
+
+
+    <div id="group-container">
+    {% for group in userGroupsList %}
+        {% if group["last_message_read"] %}
+            <button id="{{group.group_id}}" class="group" onclick="enterGroup('{{group.group_id}}', '{{group.group_name}}')">{{group["group_name"]}}</button>
+        {% else %}
+            <button id="{{group.group_id}}" class="group unread" onclick="enterGroup('{{group.group_id}}', '{{group.group_name}}')">{{group["group_name"]}}</button>
+        {% endif %}
+    {% endfor %}
+    </div>
+
+
+    <div id="messages-container">
+        <h2 id="group-name"></h2>
+        <div id="messages">
+        
+        </div>
+    </div>
+
+    
+    <div id="message-container">
+        <input type="text" id="message-box">
+        <button onClick="sendMessage()"></button>
+    </div>
+
+</main>
+
+<script type="text/javascript">
+
+    const username = "{{ user.username }}"
+    const userID = "{{ user.id }}"
+
+    const socket = io()
+
+    const messages = document.getElementById("messages")
+
+    const createMessage = (data) => {
+        curGroup = sessionStorage.getItem("group")
+
+        if (data['groupId'] != curGroup) {
+            socket.emit("leaveGroup", {data: data['groupId']})
+            return
+        }
+
+        const content = `
+            <div class="sent-message">
+                <p class="message-text">${data['username']} said: ${data['content']} ${data['dateCreated']} </p>
+            </div>
+        `
+        messages.innerHTML += content
+    }
+
+    socket.on('message', (data) => {
+        console.log('sent')
+        createMessage(data)
+    })
+
+    socket.on("message_list", (data) => {
+        console.log(data)
+        
+        for (let i = 0; i < data.length; i++) {
+            console.log(data[i])
+            createMessage(data[i])
+        }
+            
+    })
+
+    socket.on("join_this_group", (data) => {
+        console.log(data)
+        groupContainer = document.getElementById("group-container");
+        for (let i = 0; i < groupContainer.children.length; i++) {
+            console.log(groupContainer.children[i].innerHTML)
+            if (groupContainer.children[i].innerHTML == data) {
+                groupContainer.children[i].click()
+            }
+        }
+    })
+
+    socket.on("new_group_made", (data) => {
+        console.log(username)
+        let userIds = data["user_ids"]
+        let groupName = data["group_name"]
+        //if this user isnt in the list of users in the group just made ignore it
+        if (!userIds.includes(userID)) {
+            return
+        }
+
+        // group name : "*" means its only two people in the group, so the group name should be the 
+        // other person, code below finds name of other person.
+        if (data["group_name"] == "*") {
+            for (let i = 0; i < data["usernames"].length; i++) {
+                if (data["usernames"][i] != username) {
+                    groupName = data["usernames"][i]
+                }
+            }
+        }
+        
+        const newGroupHTML = `
+            <button id=${data['group_id']} class="group unread" onclick="enterGroup('${data['group_id']}', '${groupName}')">${groupName}</button>
+        `
+
+        const groupContainer = document.getElementById("group-container")
+        groupContainer.innerHTML = newGroupHTML + groupContainer.innerHTML;
+    })
+
+    const sendMessage = () => {
+        const message = document.getElementById("message-box")
+        if (!message.value == "") {
+            socket.emit("message", {data: message.value})
+            message.value = ""
+        }
+
+
+        curGroup = sessionStorage.getItem("group")
+        userGroup = document.getElementById(curGroup)
+        userGroups = document.getElementById("group-container")
+
+        userGroup.parentNode.removeChild(userGroup)
+        userGroups.insertBefore(userGroup, userGroups.firstChild)
+        
+    }
+
+    const searchUsers = () => {
+        const searchBox = document.getElementById('search-box')
+        console.log('searchUsers')
+        socket.emit("userSearch", {data: searchBox.value})
+    }
+
+    const enterGroup = (groupId, groupName) => {
+        curGroup = sessionStorage.getItem("group")
+        sessionStorage.setItem("group", groupId)
+        socket.emit("enterGroup", {data: groupId})
+        
+        
+        groupEntered = document.getElementById(groupId);
+        groupEntered.classList.remove("unread");
+
+        //add group name at top of screen
+        groupNameElement = document.getElementById("group-name");
+
+        groupNameElement.innerHTML = groupName;
+
+        while (messages.firstChild) {
+            messages.firstChild.remove()
+        }
+        
+        const groupList = document.getElementById("group-container");
+        for (let i = 0; i < groupList.children.length; i++) {
+            if (groupList.children[i].innerHTML == groupName) {
+                groupList.children[i].classList.add("focused");
+            } else {
+                groupList.children[i].classList.remove("focused");
+            }
+        }
+    }
+
+</script>
+
+{% for user in users %}
+    <div>{{ user.username }}</div>
+{% endfor %}
+{% endblock %}
