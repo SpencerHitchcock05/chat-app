@@ -17,6 +17,7 @@ app.config["SECRET_KEY"] = "chat_app"
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
+rooms = []
 
 class User(db.Model):
     id = db.Column(db.String(200), primary_key=True)
@@ -59,6 +60,8 @@ def index():
     user_groups_list = []
 
     for group in user_groups:
+
+
         group_name = Group.query.filter_by(group_id = group.group_id).scalar().group_name
         group_date = Group.query.filter_by(group_id = group.group_id).scalar().date_created
         group_message_date = Message.query.filter_by(group_id = group.group_id).order_by(Message.date_created.desc()).first()  
@@ -84,6 +87,8 @@ def index():
             "last_message_time" : last_message_date,
             "last_message_read" : group.last_message_read,
         })
+
+    print(rooms)
 
     user_groups_list.sort(reverse=True, key=compare_group_dates)
 
@@ -161,6 +166,10 @@ def new_account():
 
     return render_template("new_account.html")
 
+
+## added that on connection user joins into room for each of the users group
+##later add so that when message is sent send other members in group that there 
+##is a new message
 @socketio.on('message')
 def message(data):
     content = {
@@ -173,6 +182,13 @@ def message(data):
     send(content, to=session.get('group'))
 
     new_message = Message(id=gen_code(), group_id=session.get("group"), username = session.get("username"), content = content["content"], date_created = datetime.now())
+
+    user_id = User.query.filter_by(username = session.get("username")).scalar().id
+
+    message_group = GroupMembership.query.filter(GroupMembership.group_id==session.get("group"), GroupMembership.user_id!=user_id)
+
+    message_group.update({GroupMembership.last_message_read: False})
+
     ##print(new_message)
     try:
         db.session.add(new_message)
@@ -222,13 +238,15 @@ def enterGroup(data):
 
     print(datetime.now())
 
-
+'''
 @socketio.on("leaveGroup")
 def leaveGroup(data):
+
+    
     print(data["data"])
     cur_group = data["data"]
     leave_room(cur_group)
-
+'''
 
 @socketio.on("userSearch")
 def userSearch(data):
@@ -289,11 +307,22 @@ def userSearch(data):
 
 @socketio.on('connect')
 def connect(auth):
+
+    user = User.query.filter_by(username = session.get("username")).scalar()
+    user_groups = GroupMembership.query.filter_by(user_id = user.id).all() #find what groups user is in server side then send groups, not group meberships
+
+    for group in user_groups:
+        rooms.append(group.group_id)
+        join_room(group.group_id)
+    
+    
     print("connected")
 
 @socketio.on("disconnect")
 def disconnect():
     print('disconnected')
+    for room in rooms:
+        leave_room(room)
     group = session.get("group")
     leave_room(group)
 

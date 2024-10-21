@@ -5,7 +5,7 @@
 <nav id="nav-container">
     <div>
         <input type="text" id="search-box">
-        <button onClick="searchUsers()" id="search-button"></button>
+        <button onClick="searchUsers()" id="search-button">Search User</button>
     </div>
 </nav>
 
@@ -35,7 +35,7 @@
     
     <div id="message-container">
         <input type="text" id="message-box">
-        <button onClick="sendMessage()"></button>
+        <button onClick="sendMessage()">Send</button>
     </div>
 
 </main>
@@ -50,12 +50,6 @@
     const messages = document.getElementById("messages")
 
     const createMessage = (data) => {
-        curGroup = sessionStorage.getItem("group")
-
-        if (data['groupId'] != curGroup) {
-            socket.emit("leaveGroup", {data: data['groupId']})
-            return
-        }
 
         const content = `
             <div class="sent-message">
@@ -66,6 +60,22 @@
     }
 
     socket.on('message', (data) => {
+        curGroup = sessionStorage.getItem("group")
+
+
+        // fix if message sent and user is not in that group, the group from the message should be moved to the top and be marked unread.
+        if (data['groupId'] != curGroup) {
+            //socket.emit("leaveGroup", {data: data['groupId']})
+            userGroup = document.getElementById(data["groupId"])
+            userGroups = document.getElementById("group-container")
+            userGroup.parentNode.removeChild(userGroup)
+            userGroups.insertBefore(userGroup, userGroups.firstChild)    
+            
+            userGroup.classList.add("unread")
+            return
+        }
+
+
         console.log('sent')
         createMessage(data)
     })
