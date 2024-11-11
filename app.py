@@ -107,10 +107,6 @@ def login():
         username = request.form['username']
         password = request.form['password']
         login = request.form.get('login', False)
-        new_account = request.form.get('new_account', False)
-
-        if new_account:
-            return redirect(url_for('new_account'))
 
         if not username:
             return render_template('login.html', error = "please input a username", username = username)

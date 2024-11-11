@@ -1,21 +1,20 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<form action="/login" method="POST">
-    <label for="username">Username:</label>
-    <input type="text" name="username" value="{{username}}">
-    <label for="room">Password:</label>
-    <input type="password" name="password" value='{{password}}'>
-    <input type="submit" name="login" value="Login">
-    <input type="submit" name="new_account" value="Create New Account">
+<div class="d-flex justify-content-center align-items-center w-100 h-25">
+    <form class="d-flex flex-column" action="/login" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" value="{{username}}">
+        <label for="room">Password:</label>
+        <input type="password" name="password" value='{{password}}'>
+        <input class="btn btn-primary my-4" type="submit" name="login" value="Login">
+        <a name="new_account" href="./new_account">Don't have an account? Create a new one!</a>
 
-    {% if error %}
-        <div>
-            {{error}}
-        </div>
-    {% endif %}
-</form>
-{% for user in users %}
-    <div>{{ user.username }}</div>
-{% endfor %}
+        {% if error %}
+            <div class="text-danger">
+                {{error}}
+            </div>
+        {% endif %}
+    </form>
+</div>
 {% endblock %}

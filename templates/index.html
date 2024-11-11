@@ -2,45 +2,55 @@
 
 {% block body %}
 
-<nav id="nav-container">
-    <div>
-        <input type="text" id="search-box">
-        <button onClick="searchUsers()" id="search-button">Search User</button>
-    </div>
-</nav>
 
-<h1>{{user.username}}</h1>
+
+
 
 <main>
 
-
-    <div id="group-container">
-    {% for group in userGroupsList %}
-        {% if group["last_message_read"] %}
-            <button id="{{group.group_id}}" class="group" onclick="enterGroup('{{group.group_id}}', '{{group.group_name}}')">{{group["group_name"]}}</button>
-        {% else %}
-            <button id="{{group.group_id}}" class="group unread" onclick="enterGroup('{{group.group_id}}', '{{group.group_name}}')">{{group["group_name"]}}</button>
-        {% endif %}
-    {% endfor %}
+    <div id="group-side-bar" class="m-4">
+        <h1>{{user.username}}</h1>
+        <div id="search-container" class="d-flex text-nowrap my-3">
+            <input class="" type="text" id="search-box">
+            <button onClick="searchUsers()" id="search-button">Search User</button>
+        </div>
+        <div id="group-container">    
+        {% for group in userGroupsList %}
+            {% if group["last_message_read"] %}
+                <button id="{{group.group_id}}" class="group" onclick="enterGroup('{{group.group_id}}', '{{group.group_name}}')">{{group["group_name"]}}</button>
+            {% else %}
+                <button id="{{group.group_id}}" class="group unread" onclick="enterGroup('{{group.group_id}}', '{{group.group_name}}')">{{group["group_name"]}}</button>
+            {% endif %}
+        {% endfor %}
+        </div>
     </div>
 
 
     <div id="messages-container">
         <h2 id="group-name"></h2>
-        <div id="messages">
+        <div id="messages" class="messages">
         
         </div>
     </div>
 
     
     <div id="message-container">
-        <input type="text" id="message-box">
-        <button onClick="sendMessage()">Send</button>
+        <form class="d-flex justify-content-center align-items-center w-75" id="search-form">
+            <input type="text" id="message-box">
+            <button onClick="sendMessage()">Send</button>
+        </form>
     </div>
 
 </main>
 
 <script type="text/javascript">
+
+    const form =  document.getElementById("search-form")
+    
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        sendMessage()
+    })
 
     const username = "{{ user.username }}"
     const userID = "{{ user.id }}"
@@ -49,21 +59,33 @@
 
     const messages = document.getElementById("messages")
 
+
     const createMessage = (data) => {
 
+        const newMessage = document.createElement('div');
+
+
         const content = `
-            <div class="sent-message">
-                <p class="message-text">${data['username']} said: ${data['content']} ${data['dateCreated']} </p>
+            <div class="sent-message-container p-4 d-flex ${data['username'] == username ? "justify-content-end new-message-right" : "new-message-left"}">
+                <div class="${data['username'] == username ? "bg-primary text-white" : "bg-light"} px-3 rounded-3 m-3">
+                    <p class="m-0 small pt-2 ${data['username'] == username ? "text-white" : "text-secondary"}">${data['dateCreated']}</p>
+                    
+                    <div class="sent-message ">
+                        <p class="message-text justify-self-end">${data['username']} said: ${data['content']} </p>
+                    </div>
+                </div>
             </div>
         `
-        messages.innerHTML += content
+
+        newMessage.innerHTML = content
+
+        messages.appendChild(newMessage)
     }
 
     socket.on('message', (data) => {
         curGroup = sessionStorage.getItem("group")
 
 
-        // fix if message sent and user is not in that group, the group from the message should be moved to the top and be marked unread.
         if (data['groupId'] != curGroup) {
             //socket.emit("leaveGroup", {data: data['groupId']})
             userGroup = document.getElementById(data["groupId"])
@@ -77,7 +99,24 @@
 
 
         console.log('sent')
+
+        //fix scroll bar to bottom if already at the bottom
+        const messages = document.getElementById("messages")
+
+        const atBottomOfScrollbar = (messages.scrollTop >= messages.scrollHeight - messages.clientHeight - 100)
+
+        console.log(messages.scrollTop)
+
+        console.log(messages.scrollHeight)
         createMessage(data)
+
+        if (atBottomOfScrollbar) {
+            messages.scrollTop = messages.scrollHeight
+        }
+
+        
+
+        
     })
 
     socket.on("message_list", (data) => {
@@ -87,7 +126,10 @@
             console.log(data[i])
             createMessage(data[i])
         }
-            
+
+        const messages = document.getElementById("messages")
+
+        messages.scrollTop = messages.scrollHeight
     })
 
     socket.on("join_this_group", (data) => {
@@ -181,7 +223,4 @@
 
 </script>
 
-{% for user in users %}
-    <div>{{ user.username }}</div>
-{% endfor %}
 {% endblock %}
