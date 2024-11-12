@@ -8,4 +8,23 @@ and Thought it would fun to make a project that can be sent to friends to be use
 
 ## Built With
 
-* [![Next][Next.js]][Next-url]
+* #### Flask
+* #### SocketIO
+* #### SQLAlchemy
+
+## installation
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/SpencerHitchcock/repo_name.git
+   ```
+2. Install packages
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+## Contact
+
+Spencer Hitchcock - sp797499@dal.ca
+
+Project Link: [https://github.com/SpencerHitchcock05/chat-app](https://github.com/SpencerHitchcock05/chat-app)
