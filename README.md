@@ -6,6 +6,8 @@
 This is a simple chat web app that allows the user to create their own account and send direct messages to other users. I made this project to become more familiar with using Python in a practical way
 and Thought it would fun to make a project that can be sent to friends to be used together.
 
+This project is usually hosted on the following url:  https://simple-chat-l6hx.onrender.com/
+
 ## Built With
 
 * #### Flask
