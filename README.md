@@ -13,6 +13,7 @@ This project is usually hosted on the following url:  https://simple-chat-l6hx.o
 * #### Flask
 * #### SocketIO
 * #### SQLAlchemy
+* #### Bootstrap
 
 ## installation
 
