@@ -127,6 +127,12 @@ def login():
     users = User.query.order_by(User.date_created).all()
     return render_template('login.html', users = users)
 
+@app.route('/logout', methods=['POST', "GET"])
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+    
+
 @app.route('/new_account', methods=["POST", "GET"])
 def new_account():
     if request.method == 'POST':

@@ -10,6 +10,9 @@
 <body>
     <nav class="border-bottom border-dark" id="nav-container">
         <h1 class="mx-4">Simple Chat</h1>
+        {% if session["username"] %}
+            <a class="mx-4" href="./logout" >Logout ({{ session["username"] }})</a>
+        {% endif %}
     </nav>
 
     {% block body %}{% endblock %}
